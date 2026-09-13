@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hue-config
+  namespace: bigdata
+data:
+  z-hue.ini: |
+    [desktop]
+    secret_key=secretkeyforhuewallettracker12345
+    http_host=0.0.0.0
+    http_port=8888
+    time_zone=Europe/Istanbul
+    app_blacklist=impala,hive,pig,hbase,sqoop,zookeeper,spark
+
+    [[database]]
+    engine=sqlite3
+    name=/usr/share/hue/desktop/desktop.db
+
+    [notebook]
+    show_notebooks=true
+
+    [[interpreters]]
+    [[[trino]]]
+    name=Trino
+    interface=sqlalchemy
+    options='{"url": "trino://trino.bigdata.svc.cluster.local:8090/iceberg/wallettracker"}'

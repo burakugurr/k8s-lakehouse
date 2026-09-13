@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filestash-config
+  namespace: bigdata
+data:
+  config.json: |
+    {
+      "connections": [
+        {
+          "type": "s3",
+          "label": "LocalStack S3 (Warehouse)",
+          "endpoint": "http://localstack-service.bigdata.svc.cluster.local:4566",
+          "bucket": "warehouse",
+          "region": "us-east-1",
+          "accessKeyId": "test",
+          "secretAccessKey": "test",
+          "s3ForcePathStyle": true
+        }
+      ]
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3-ui-filestash
+  namespace: bigdata
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: s3-ui
+  template:
+    metadata:
+      labels:
+        app: s3-ui
+    spec:
+      # 1. Başlatıcı Konteyner (Dosyayı okunabilir ConfigMap'ten alıp, yazılabilir klasöre kopyalar)
+      initContainers:
+      - name: init-config
+        image: busybox:latest
+        command: ['sh', '-c', 'mkdir -p /app/data/state/config && cp /tmp/config/config.json /app/data/state/config/config.json && chmod 666 /app/data/state/config/config.json']
+        volumeMounts:
+        - name: config-ro
+          mountPath: /tmp/config
+        - name: config-rw
+          mountPath: /app/data/state/config
+          
+      # 2. Asıl Uygulama Konteyneri
+      containers:
+      - name: filestash
+        image: machines/filestash:latest
+        ports:
+        - containerPort: 8334
+        volumeMounts:
+        - name: config-rw
+          mountPath: /app/data/state/config
+          
+      # 3. Volume Tanımlamaları
+      volumes:
+      - name: config-ro
+        configMap:
+          name: filestash-config
+      - name: config-rw
+        emptyDir: {}  # Filestash'in yazabileceği serbest alan
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s3-ui-service
+  namespace: bigdata
+spec:
+  selector:
+    app: s3-ui
+  ports:
+    - protocol: TCP
+      port: 8334
+      targetPort: 8334

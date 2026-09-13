@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyter-spark
+  namespace: bigdata
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jupyter-spark
+  template:
+    metadata:
+      labels:
+        app: jupyter-spark
+    spec:
+      containers:
+      - name: jupyter
+        image: jupyter/pyspark-notebook:latest
+        ports:
+        - containerPort: 8888
+        - containerPort: 4040
+        env:
+        - name: JUPYTER_TOKEN
+          value: "bigdata"
+        - name: JUPYTER_ENABLE_LAB
+          value: "yes"
+        volumeMounts:
+        - name: jupyter-storage
+          mountPath: /home/jovyan/work
+      volumes:
+      - name: jupyter-storage
+        persistentVolumeClaim:
+          claimName: jupyter-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyter-spark-service
+  namespace: bigdata
+spec:
+  selector:
+    app: jupyter-spark
+  ports:
+    - name: jupyter-ui
+      port: 8888
+      targetPort: 8888
+    - name: spark-ui
+      port: 4040
+      targetPort: 4040

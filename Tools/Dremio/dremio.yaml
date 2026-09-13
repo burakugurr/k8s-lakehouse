@@ -1,0 +1,138 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dremio-hadoop-conf
+  namespace: bigdata
+data:
+  core-site.xml: |
+    <?xml version="1.0"?>
+    <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+    <configuration>
+      <!-- LocalStack S3 Varsayılan Bağlantı Ayarları -->
+      <property>
+        <name>fs.s3a.endpoint</name>
+        <value>http://localstack-service.bigdata.svc.cluster.local:4566</value>
+      </property>
+      <property>
+        <name>fs.s3a.path.style.access</name>
+        <value>true</value>
+      </property>
+      <property>
+        <name>fs.s3a.connection.ssl.enabled</name>
+        <value>false</value>
+      </property>
+      <property>
+        <name>fs.s3a.aws.credentials.provider</name>
+        <value>org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider</value>
+      </property>
+      <property>
+        <name>fs.s3a.access.key</name>
+        <value>test</value>
+      </property>
+      <property>
+        <name>fs.s3a.secret.key</name>
+        <value>test</value>
+      </property>
+      <property>
+        <name>dremio.s3.compat</name>
+        <value>true</value>
+      </property>
+    </configuration>
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dremio-data-pvc
+  namespace: bigdata
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dremio
+  namespace: bigdata
+  labels:
+    app: dremio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dremio
+  template:
+    metadata:
+      labels:
+        app: dremio
+    spec:
+      containers:
+        - name: dremio
+          image: dremio/dremio-oss:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9047
+              name: web-ui
+            - containerPort: 31010
+              name: client-odbc
+            - containerPort: 32010
+              name: flight-sql
+          env:
+            - name: DREMIO_JAVA_SERVER_EXTRA_OPTS
+              value: "-Dpaths.dist=file:///opt/dremio/data/dist -Dpaths.local=/opt/dremio/data"
+            
+            # --- DEFAULT AWS & S3 ORTAM DEĞİŞKENLERİ ---
+            - name: AWS_ENDPOINT_URL
+              value: "http://localstack-service.bigdata.svc.cluster.local:4566"
+            - name: AWS_ENDPOINT_URL_S3
+              value: "http://localstack-service.bigdata.svc.cluster.local:4566"
+            - name: AWS_ACCESS_KEY_ID
+              value: "test"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "test"
+            - name: AWS_REGION
+              value: "us-east-1"
+            - name: AWS_S3_PATH_STYLE_ACCESS
+              value: "true"
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
+          volumeMounts:
+            - name: dremio-storage
+              mountPath: /opt/dremio/data
+            - name: hadoop-config
+              mountPath: /opt/dremio/conf/core-site.xml
+              subPath: core-site.xml
+      volumes:
+        - name: dremio-storage
+          persistentVolumeClaim:
+            claimName: dremio-data-pvc
+        - name: hadoop-config
+          configMap:
+            name: dremio-hadoop-conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dremio-service
+  namespace: bigdata
+spec:
+  type: ClusterIP
+  selector:
+    app: dremio
+  ports:
+    - name: web-ui
+      port: 9047
+      targetPort: 9047
+    - name: flight-sql
+      port: 32010
+      targetPort: 32010
+    - name: client-odbc
+      port: 31010
+      targetPort: 31010

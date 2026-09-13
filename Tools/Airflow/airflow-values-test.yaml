@@ -1,0 +1,41 @@
+executor: "LocalExecutor"
+redis:
+  enabled: false
+
+webserverSecretKey: "gizli-anahtar-minikube-icin"
+createUserJob:
+  useHelmHooks: false
+  applyCustomEnv: false
+  defaultUser:
+    enabled: true
+    role: Admin
+    username: admin
+    email: admin@example.com
+    firstName: admin
+    lastName: admin
+    password: admin
+
+service:
+  type: ClusterIP
+
+# === LOKAL DAG AYARI ===
+dags:
+  persistence:
+    enabled: true
+    existingClaim: "airflow-dags-pvc"
+logs:
+  persistence:
+    enabled: true
+    size: 1Gi
+
+# === AIRFLOW PERFORMANS VE TARAMA AYARLARI ===
+config:
+  scheduler:
+    # Yeni dosyaları arama sıklığı (saniye) - Varsayılan: 300
+    dag_dir_list_interval: "30"
+    # Mevcut dosyaları parse etme sıklığı (saniye) - Varsayılan: 30
+    min_file_process_interval: "10"
+
+apiServer:
+  service:
+    type: NodePort

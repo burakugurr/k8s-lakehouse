@@ -1,0 +1,246 @@
+nohup: girdi yok sayılıyor
+Forwarding from 0.0.0.0:8888 -> 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+E0828 14:52:54.258666   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 14:53:10.514274   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+E0828 14:53:27.769583   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 14:54:40.096648   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+Handling connection for 8888
+E0828 14:55:24.244323   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+E0828 14:55:28.086646   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 14:57:29.172628   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 14:59:30.102326   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+Handling connection for 8888
+E0828 15:00:18.294656   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:00:21.775633   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+E0828 15:00:48.375651   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:01:31.523087   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:03:32.107415   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:05:46.086759   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:07:46.100994   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:10:46.089608   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:12:46.097181   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:14:46.112389   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:17:46.096139   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:19:46.103690   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:22:46.104108   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:25:46.087906   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:28:46.093091   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:30:46.488084   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:32:46.096791   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:34:46.085780   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:36:46.096136   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:38:46.110776   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:39:53.615065   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:40:47.099891   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:41:57.106709   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:43:46.084812   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+Handling connection for 8888
+E0828 15:44:34.369293   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:44:40.133306   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+E0828 15:45:04.501643   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:45:52.324833   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:46:29.092090   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:47:20.184061   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:48:46.093274   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:50:46.089193   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+E0828 15:51:52.689623   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+E0828 15:51:52.689666   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:52:07.096408   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:52:13.203002   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+E0828 15:52:13.411924   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+E0828 15:52:18.130605   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+E0828 15:52:25.101461   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+E0828 15:52:37.211763   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+Handling connection for 8888
+Handling connection for 8888
+E0828 15:53:15.577087   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+E0828 15:53:15.577191   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+E0828 15:53:16.332786   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"
+Handling connection for 8888
+E0828 15:53:46.536341   17491 portforward.go:455] "Unhandled Error" err="error creating error stream for port 8888 -> 8888: Timeout occurred"

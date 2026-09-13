@@ -1,0 +1,16 @@
+{
+  "catalog": {
+    "name": "polaris",
+    "type": "INTERNAL",
+    "properties": {
+      "default-base-location": "s3://warehouse"
+    },
+    "storageConfigInfo": {
+      "storageType": "S3_COMPATIBLE",
+      "allowedLocations": ["s3://warehouse/*", "s3://warehouse"],
+      "s3.endpoint": "http://localstack-service.bigdata.svc.cluster.local:4566",
+      "s3.pathStyleAccess": true,
+      "region": "us-east-1"
+    }
+  }
+}

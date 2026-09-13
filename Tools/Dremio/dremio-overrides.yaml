@@ -1,0 +1,91 @@
+image: dremio/dremio-oss
+imageTag: latest
+
+# 1. LocalStack S3 distributed storage for Kubernetes
+# Use structured properties instead of raw XML so Helm can render the pod config correctly.
+distStorage:
+  type: "aws"
+  aws:
+    bucketName: "warehouse"
+    path: "/dremio/dist"
+    region: "us-east-1"
+    credentials:
+      accessKey: "test"
+      secretKey: "test"
+    pathStyleAccess: true
+    s3Compatible: true
+    extraProperties:
+      - name: "fs.s3a.endpoint"
+        value: "http://localstack-service.bigdata.svc.cluster.local:4566"
+      - name: "fs.s3a.path.style.access"
+        value: "true"
+      - name: "fs.s3a.connection.ssl.enabled"
+        value: "false"
+      - name: "fs.s3a.aws.credentials.provider"
+        value: "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider"
+      - name: "dremio.s3.compat"
+        value: "true"
+
+# 2. Coordinator (Master)
+coordinator:
+  master:
+    name: master
+    count: 1
+    resources:
+      requests:
+        cpu: "1"
+        memory: "2Gi"
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+    memory:
+      heap:
+        size: "1024m"
+      direct:
+        size: "2048m"
+    volumeSize: 10Gi
+    storageClass: "standard"
+
+  slave:
+    count: 0
+
+  web:
+    port: 9047
+  client:
+    port: 31010
+  flight:
+    port: 32010
+
+# 3. Executor (Worker)
+executor:
+  count: 1
+  resources:
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+  memory:
+    heap:
+      size: "1024m"
+    direct:
+      size: "2048m"
+  volumeSize: 10Gi
+  storageClass: "standard"
+
+# 4. Zookeeper
+zookeeper:
+  count: 1
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+  volumeSize: 5Gi
+  storageClass: "standard"
+
+extraStartParams: >-
+  -Dpaths.dist=dremioS3:///warehouse/dremio/dist

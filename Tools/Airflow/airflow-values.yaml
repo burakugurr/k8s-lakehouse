@@ -1,0 +1,80 @@
+# === MİMARİ VE YÜRÜTÜCÜ (Lokal Ortam İçin İdeal) ===
+executor: "KubernetesExecutor"
+
+redis:
+  enabled: false
+
+# === VERİTABANI ===
+postgresql:
+  enabled: true
+
+# === KULLANICI VE GÜVENLİK ===
+webserverSecretKey: "gizli-anahtar-minikube-icin"
+createUserJob:
+  useHelmHooks: false
+  applyCustomEnv: false
+  defaultUser:
+    enabled: true
+    role: Admin
+    username: admin
+    email: admin@example.com
+    firstName: admin
+    lastName: admin
+    password: admin
+
+# === LOKAL DAG AYARI ===
+# persistence: enabled = true olduğunda chart tüm pod'lara otomatik mount eder
+dags:
+  persistence:
+    enabled: true
+    existingClaim: "airflow-dags-pvc"
+
+dagProcessor:
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+triggerer:
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "384Mi"
+
+# === LOGLAMA VE S3 (LOCALSTACK) ENTEGRASYONU ===
+logs:
+  persistence:
+    enabled: false # Yerel diske (PVC) log yazmayı kapatıyoruz
+
+config:
+  dag_processor:
+    refresh_interval: "30"
+    max_runs: "1"
+  scheduler:
+    min_file_process_interval: "10"
+  logging:
+    remote_logging: "True"
+    remote_base_log_folder: "s3://airflow-logs/logs"
+    remote_log_conn_id: "my_s3_conn"
+  kubernetes_executor:
+    delete_worker_pods: "False"
+    delete_worker_pods_on_failure: "False"
+
+# === ARAYÜZ (NODEPORT) ===
+apiServer:
+  service:
+    type: NodePort
+
+env:
+  - name: "AIRFLOW__CORE__TEST_CONNECTION"
+    value: "Enabled"
+  - name: "AIRFLOW_CONN_MY_S3_CONN"
+    value: '{"conn_type": "aws", "login": "test", "password": "test", "extra": {"endpoint_url": "http://localstack-service.bigdata.svc.cluster.local:4566", "region_name": "us-east-1", "config_kwargs": {"s3": {"addressing_style": "path"}}}}'
+  - name: "_PIP_ADDITIONAL_REQUIREMENTS"
+    value: "apache-airflow-providers-trino apache-airflow-providers-cncf-kubernetes apache-airflow-providers-amazon apache-airflow-providers-http apache-airflow-providers-apache-spark requests pandas tabulate"

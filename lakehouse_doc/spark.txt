@@ -1,0 +1,59 @@
+import requests
+import time
+from pyspark.sql import SparkSession
+
+# --- ŞİFRELERİNİZ ---
+client_id = "bef09777670113ab"
+client_secret = "a3bb4ae71ce4eba0ab69e17eb775e362"
+
+base_url = "http://polaris-catalog-service.bigdata.svc.cluster.local:8181"
+localstack_url = "http://localstack-service.bigdata.svc.cluster.local:4566"
+
+# 1. Spark Oturumu (s3:// ve s3a:// protokollerinin her ikisi de tanımlı)
+print("Spark oturumu başlatılıyor...")
+spark = SparkSession.builder \
+    .appName("Iceberg-Polaris-Final") \
+    .config(
+        "spark.jars.packages",
+        "org.apache.hadoop:hadoop-aws:3.3.4,"
+        "com.amazonaws:aws-java-sdk-bundle:1.12.262,"
+        "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,"
+        "org.apache.iceberg:iceberg-aws-bundle:1.5.0"
+    ) \
+    .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions") \
+    .config("spark.sql.catalog.polaris", "org.apache.iceberg.spark.SparkCatalog") \
+    .config("spark.sql.catalog.polaris.type", "rest") \
+    .config("spark.sql.catalog.polaris.uri", f"{base_url}/api/catalog") \
+    .config("spark.sql.catalog.polaris.credential", f"{client_id}:{client_secret}") \
+    .config("spark.sql.catalog.polaris.scope", "PRINCIPAL_ROLE:ALL") \
+    .config("spark.sql.catalog.polaris.warehouse", "polaris") \
+    .config("spark.sql.catalog.polaris.header.X-Iceberg-Access-Delegation", "false") \
+    .config("spark.sql.catalog.polaris.io-impl", "org.apache.iceberg.aws.s3.S3FileIO") \
+    .config("spark.sql.catalog.polaris.s3.endpoint", localstack_url) \
+    .config("spark.sql.catalog.polaris.s3.path-style-access", "true") \
+    .config("spark.sql.catalog.polaris.s3.access-key-id", "test") \
+    .config("spark.sql.catalog.polaris.s3.secret-access-key", "test") \
+    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
+    .config("spark.hadoop.fs.s3a.access.key", "test") \
+    .config("spark.hadoop.fs.s3a.secret.key", "test") \
+    .config("spark.hadoop.fs.s3a.endpoint", localstack_url) \
+    .config("spark.hadoop.fs.s3a.path.style.access", "true") \
+    .config("spark.hadoop.fs.s3a.connection.ssl.enabled", "false") \
+    .config("spark.hadoop.fs.s3.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
+    .config("spark.sql.defaultCatalog", "polaris") \
+    .getOrCreate()
+
+print("✅ Spark hazır!\n")
+
+# 2. Veri Ekleme (INSERT)
+print("Veriler Iceberg tablosuna yazılıyor...")
+spark.sql("""
+    INSERT INTO polaris.ts_db.users VALUES 
+    (1, 'Aleyna', 'Data Engineer'),
+    (2, 'Ahmet', 'Backend Developer')
+""")
+print("✅ Veriler S3'e başarıyla yazıldı!\n")
+
+# 3. Veri Okuma (SELECT)
+print("--- Polaris Iceberg Tablosu: polaris.ts_db.users ---")
+spark.sql("SELECT * FROM polaris.ts_db.users").show()

@@ -1,0 +1,103 @@
+TRINO_POD=$(kubectl get pods -n bigdata -l app.kubernetes.io/component=coordinator --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}')
+
+echo "=========================================================="
+echo "       POLARIS YENİ CREDENTIAL ÜRETİMİ (RECREATE)"
+echo "=========================================================="
+
+for user in burak ahmet aleyna zehra; do
+  echo ">>> Kullanıcı: $user"
+  
+  # 1. Varsa eski principal'ı sil
+  kubectl exec -it $TRINO_POD -n bigdata -- curl -s -X DELETE \
+    http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/management/v1/principals/$user \
+    -H "Authorization: Bearer $ADMIN_TOKEN" > /dev/null
+
+  # 2. Yeniden oluştur ve dönen JSON'ı göster
+  RESP=$(kubectl exec -it $TRINO_POD -n bigdata -- curl -s -X POST \
+    http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/management/v1/principals \
+    -H "Authorization: Bearer $ADMIN_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"principal\":{\"name\":\"$user\"}}")
+
+  echo "Oluşturma Yanıtı:"
+  echo "$RESP"
+  echo "----------------------------------------------------------"
+done
+
+# 3. Principal rollerini kullanıcılara yeniden ata
+echo "--> Roller kullanıcılara atanıyor..."
+for user in burak ahmet; do
+  kubectl exec -it $TRINO_POD -n bigdata -- curl -s -X PUT \
+    http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/management/v1/principals/$user/principal-roles \
+    -H "Authorization: Bearer $ADMIN_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"principalRole":{"name":"de_principal_role"}}' > /dev/null
+done
+
+kubectl exec -it $TRINO_POD -n bigdata -- curl -s -X PUT \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/management/v1/principals/aleyna/principal-roles \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"principalRole":{"name":"ds_principal_role"}}' > /dev/null
+
+kubectl exec -it $TRINO_POD -n bigdata -- curl -s -X PUT \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/management/v1/principals/zehra/principal-roles \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"principalRole":{"name":"etl_principal_role"}}' > /dev/null
+
+echo "Tüm kullanıcılar ve rol eşlemeleri hazır!"
+
+
+
+###########################################
+RBAC KONTROL
+#####################################
+
+
+TRINO_POD=$(kubectl get pods -n bigdata -l app.kubernetes.io/component=coordinator --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}')
+
+echo "=========================================================="
+echo "          RBAC İZOLASYON DOĞRULAMA TESTLERİ"
+echo "=========================================================="
+
+# 1. ZEHRA (ETL - Read Only Test)
+echo ">>> [1] Zehra (ETL - Read Only) Test Ediliyor..."
+ZEHRA_TOKEN=$(kubectl exec -it $TRINO_POD -n bigdata -- curl -s -X POST \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/catalog/v1/oauth/tokens \
+  -d "grant_type=client_credentials&client_id=063c9759f21afb01&client_secret=2d333c8e276ca4cbe6087a571e807525&scope=PRINCIPAL_ROLE:ALL" \
+  | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+
+echo -n "  - Tablo Okuma (200 OK beklenir): "
+kubectl exec -it $TRINO_POD -n bigdata -- curl -s -o /dev/null -w "%{http_code}\n" -X GET \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/catalog/v1/polaris/namespaces/sts_db/tables/warehouse_test \
+  -H "Authorization: Bearer $ZEHRA_TOKEN"
+
+echo -n "  - Tablo Silme Denemesi (403 Forbidden beklenir): "
+kubectl exec -it $TRINO_POD -n bigdata -- curl -s -o /dev/null -w "%{http_code}\n" -X DELETE \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/catalog/v1/polaris/namespaces/sts_db/tables/warehouse_test \
+  -H "Authorization: Bearer $ZEHRA_TOKEN"
+
+# 2. ALEYNA (Data Scientist - Read/Write Test)
+echo ">>> [2] Aleyna (Data Scientist - Read/Write) Test Ediliyor..."
+ALEYNA_TOKEN=$(kubectl exec -it $TRINO_POD -n bigdata -- curl -s -X POST \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/catalog/v1/oauth/tokens \
+  -d "grant_type=client_credentials&client_id=137d12f9fa4733c2&client_secret=5f05eb2f0327f176a99c4c6b415b32f5&scope=PRINCIPAL_ROLE:ALL" \
+  | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+
+echo -n "  - Tablo Okuma (200 OK beklenir): "
+kubectl exec -it $TRINO_POD -n bigdata -- curl -s -o /dev/null -w "%{http_code}\n" -X GET \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/catalog/v1/polaris/namespaces/sts_db/tables/warehouse_test \
+  -H "Authorization: Bearer $ALEYNA_TOKEN"
+
+# 3. BURAK (Data Engineer - Full Admin Test)
+echo ">>> [3] Burak (Data Engineer - Full Admin) Test Ediliyor..."
+BURAK_TOKEN=$(kubectl exec -it $TRINO_POD -n bigdata -- curl -s -X POST \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/catalog/v1/oauth/tokens \
+  -d "grant_type=client_credentials&client_id=66d6a20a79533f2e&client_secret=74cdef192dfca9b8cf69763a889464ae&scope=PRINCIPAL_ROLE:ALL" \
+  | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+
+echo -n "  - Namespace Listeleme (200 OK beklenir): "
+kubectl exec -it $TRINO_POD -n bigdata -- curl -s -o /dev/null -w "%{http_code}\n" -X GET \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/catalog/v1/polaris/namespaces \
+  -H "Authorization: Bearer $BURAK_TOKEN"

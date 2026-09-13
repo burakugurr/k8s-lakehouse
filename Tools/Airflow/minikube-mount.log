@@ -1,0 +1,41 @@
+nohup: girdi yok sayılıyor
+* Mounting host path /home/obase/works/k8s/DAGS into VM as /mnt/airflow-dags ...
+  - Mount type:   9p
+  - User ID:      50000
+  - Group ID:     docker
+  - Version:      9p2000.L
+  - Message Size: 262144
+  - Options:      map[]
+  - Bind Address: 192.168.49.1:45023
+* Userspace file server: 
+ufs starting
+* Successfully mounted /home/obase/works/k8s/DAGS to /mnt/airflow-dags
+
+* NOTE: This process must stay alive for the mount to be accessible ...
+Rename /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc.134298193504144 to test_dag.cpython-313.pyc
+rel  results in /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc
+rename /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc.134298193504144 to /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc gets <nil>
+Rename /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc.134298173150704 to test_dag.cpython-313.pyc
+rel  results in /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc
+rename /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc.134298173150704 to /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc gets <nil>
+Rename /home/obase/works/k8s/DAGS/__pycache__/abc.cpython-313.pyc.132171085784880 to abc.cpython-313.pyc
+rel  results in /home/obase/works/k8s/DAGS/__pycache__/abc.cpython-313.pyc
+rename /home/obase/works/k8s/DAGS/__pycache__/abc.cpython-313.pyc.132171085784880 to /home/obase/works/k8s/DAGS/__pycache__/abc.cpython-313.pyc gets <nil>
+Rename /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc.127193497056816 to test_dag.cpython-313.pyc
+rel  results in /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc
+rename /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc.127193497056816 to /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc gets <nil>
+Rename /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc.127193476378672 to test_dag.cpython-313.pyc
+rel  results in /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc
+rename /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc.127193476378672 to /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc gets <nil>
+Rename /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc.123202462907536 to test_dag.cpython-313.pyc
+rel  results in /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc
+rename /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc.123202462907536 to /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc gets <nil>
+Rename /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc.134789403033296 to test_dag.cpython-313.pyc
+rel  results in /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc
+rename /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc.134789403033296 to /home/obase/works/k8s/DAGS/__pycache__/test_dag.cpython-313.pyc gets <nil>
+Rename /home/obase/works/k8s/DAGS/__pycache__/abc.cpython-313.pyc.134789403033296 to abc.cpython-313.pyc
+rel  results in /home/obase/works/k8s/DAGS/__pycache__/abc.cpython-313.pyc
+rename /home/obase/works/k8s/DAGS/__pycache__/abc.cpython-313.pyc.134789403033296 to /home/obase/works/k8s/DAGS/__pycache__/abc.cpython-313.pyc gets <nil>
+Rename /home/obase/works/k8s/DAGS/__pycache__/lists3.cpython-313.pyc.134789401618320 to lists3.cpython-313.pyc
+rel  results in /home/obase/works/k8s/DAGS/__pycache__/lists3.cpython-313.pyc
+rename /home/obase/works/k8s/DAGS/__pycache__/lists3.cpython-313.pyc.134789401618320 to /home/obase/works/k8s/DAGS/__pycache__/lists3.cpython-313.pyc gets <nil>

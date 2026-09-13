@@ -1,0 +1,62 @@
+image:
+  repository: trinodb/trino
+  tag: "483"
+  pullPolicy: IfNotPresent
+
+server:
+  workers: 1
+  node:
+    environment: production
+    dataDir: /data/trino
+  config:
+    query.max-memory: "1GB"
+    query.max-memory-per-node: "512MB"
+    http-server.http.port: "8090"
+
+coordinator:
+  enabled: true
+  jvm:
+    maxHeapSize: "1536M"
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1536Mi"
+    limits:
+      cpu: "1500m"
+      memory: "2500Mi"
+
+worker:
+  enabled: true
+  replicas: 1
+  jvm:
+    maxHeapSize: "1536M"
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1536Mi"
+    limits:
+      cpu: "1500m"
+      memory: "2500Mi"
+
+service:
+  type: ClusterIP
+  port: 8090
+
+additionalCatalogs:
+  iceberg: |
+    connector.name=iceberg
+    iceberg.catalog.type=rest
+    
+    # Polaris REST Entegrasyonu ve OAuth2
+    iceberg.rest-catalog.uri=http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/catalog
+    iceberg.rest-catalog.warehouse=polaris
+    iceberg.rest-catalog.security=OAUTH2
+    iceberg.rest-catalog.oauth2.credential=polaris_root:polaris_secret123
+    iceberg.rest-catalog.oauth2.scope=PRINCIPAL_ROLE:ALL
+    iceberg.rest-catalog.vended-credentials-enabled=true
+    
+    # S3 Native File System Ayarları (LocalStack)
+    fs.native-s3.enabled=true
+    s3.endpoint=http://localstack-service.bigdata.svc.cluster.local:4566
+    s3.path-style-access=true
+    s3.region=us-east-1

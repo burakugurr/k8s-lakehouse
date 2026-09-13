@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: polaris-catalog
+  namespace: bigdata
+  labels:
+    app: polaris-catalog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: polaris-catalog
+  template:
+    metadata:
+      labels:
+        app: polaris-catalog
+    spec:
+      containers:
+        - name: polaris-catalog
+          image: apache/polaris:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8181
+              name: http
+          env:
+            # --- 1. POSTGRESQL & OTOMATİK TABLO OLUŞTURMA (AUTO-MIGRATE) ---
+            - name: POLARIS_PERSISTENCE_TYPE
+              value: "relational-jdbc"
+            - name: QUARKUS_DATASOURCE_DB_KIND
+              value: "postgresql"
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              value: "jdbc:postgresql://airflow-postgresql.bigdata.svc.cluster.local:5432/polaris_db"
+            - name: QUARKUS_DATASOURCE_USERNAME
+              value: "postgres"
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              value: "postgres"
+            
+            # Tabloları ilk açılışta otomatik yaratan anahtar ayarlar:
+            - name: POLARIS_PERSISTENCE_RELATIONAL_JDBC_SCHEMA_MANAGEMENT_AUTO_MIGRATE
+              value: "true"
+            - name: POLARIS_RELATIONAL_SCHEMA_MANAGEMENT_AUTO_MIGRATE
+              value: "true"
+
+            # --- 2. SABİT ROOT KİMLİK TANIMI ---
+            - name: POLARIS_FEATURES_BOOTSTRAP_ON_STARTUP
+              value: "true"
+            - name: POLARIS_BOOTSTRAP_ROOT_CLIENT_ID
+              value: "polaris_root"
+            - name: POLARIS_BOOTSTRAP_ROOT_CLIENT_SECRET
+              value: "polaris_secret123"
+
+            # --- 2b. OAuth2 SCOPE AYARLARI ---
+            - name: POLARIS_AUTH_SERVER_SCOPES
+              value: "catalog,iceberg,polaris,warehouse"
+            - name: QUARKUS_OIDC_TOKEN_SCOPE
+              value: "catalog,iceberg,polaris,warehouse"
+
+            # --- 3. AWS / LOCALSTACK AYARLARI ---
+            - name: AWS_ENDPOINT_URL
+              value: "http://localstack-service.bigdata.svc.cluster.local:4566"
+            - name: AWS_ENDPOINT_URL_S3
+              value: "http://localstack-service.bigdata.svc.cluster.local:4566"
+            - name: AWS_ENDPOINT_URL_STS
+              value: "http://localstack-service.bigdata.svc.cluster.local:4566"
+            - name: AWS_REGION
+              value: "us-east-1"
+            - name: AWS_ACCESS_KEY_ID
+              value: "test"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "test"
+
+            # --- 4. PATH-STYLE AYARLARI ---
+            - name: AWS_S3_PATH_STYLE_ACCESS
+              value: "true"
+            - name: AWS_S3_FORCE_PATH_STYLE
+              value: "true"
+            - name: AWS_S3_USE_ARN_REGION
+              value: "false"
+            - name: QUARKUS_S3_PATH_STYLE_ACCESS
+              value: "true"
+            - name: QUARKUS_S3_ENDPOINT_OVERRIDE
+              value: "http://localstack-service.bigdata.svc.cluster.local:4566"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: polaris-catalog-service
+  namespace: bigdata
+spec:
+  type: ClusterIP
+  selector:
+    app: polaris-catalog
+  ports:
+    - name: http
+      port: 8181
+      targetPort: 8181

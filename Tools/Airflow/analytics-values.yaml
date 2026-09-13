@@ -1,0 +1,50 @@
+# === analytics-values.yaml ===
+# Sadece Analytics takımının süreçlerini yürütecek hafif kurulum
+
+# Executor tipini Kubernetes olarak belirtiyoruz
+executor: "KubernetesExecutor"
+
+# Ana sistemdeki bileşenleri kapatıyoruz (Çakışma olmaması için)
+postgresql:
+  enabled: false
+webserver:
+  enabled: false
+scheduler:
+  enabled: false
+redis:
+  enabled: false
+triggerer:
+  enabled: false
+
+# Merkezi veritabanına bağlanıyoruz
+data:
+  metadataConnection:
+    user: postgres
+    pass: postgres 
+    host: airflow-postgresql
+    port: 5432
+    db: postgres
+
+# DAG'ların olduğu ortak diski bu pod'a da bağlıyoruz
+dags:
+  persistence:
+    enabled: true
+    existingClaim: "airflow-dags-pvc"
+    size: 1Gi
+    accessMode: ReadWriteMany
+
+# Analytics Takımının İşlemcisi
+dagProcessor:
+  enabled: true
+  env:
+    - name: AIRFLOW__CORE__TEAM_ID
+      value: "analytics_team"
+    - name: AIRFLOW__CORE__DAGS_FOLDER
+      value: "/opt/airflow/dags/analytics"
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "256Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"

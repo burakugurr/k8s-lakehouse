@@ -1,0 +1,53 @@
+
+# dags-pvc.yaml
+
+apiVersion: v1
+
+kind: PersistentVolume
+
+metadata:
+
+name: airflow-dags-pv
+
+spec:
+
+capacity:
+
+storage: 1Gi
+
+accessModes:
+
+- ReadWriteMany
+
+hostPath:
+
+path: /mnt/airflow-dags
+
+---
+
+apiVersion: v1
+
+kind: PersistentVolumeClaim
+
+metadata:
+
+name: airflow-dags-pvc
+
+namespace: bigdata
+
+spec:
+
+accessModes:
+
+- ReadWriteMany
+
+storageClassName: ""
+
+volumeName: airflow-dags-pv
+
+resources:
+
+requests:
+
+storage: 1Gi 
+

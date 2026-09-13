@@ -1,0 +1,68 @@
+# 1. Veri Kalıcılığı için PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: localstack-pvc
+  namespace: bigdata
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+# 2. LocalStack Uygulaması
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: localstack
+  namespace: bigdata
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: localstack
+  template:
+    metadata:
+      labels:
+        app: localstack
+    spec:
+      containers:
+      - name: localstack
+        image: localstack/localstack:3.0.0
+        env:
+        - name: SERVICES
+          value: "s3,sts,iam"
+        - name: PERSISTENCE
+          value: "1"
+        - name: AWS_ACCESS_KEY_ID
+          value: "test"
+        - name: AWS_SECRET_ACCESS_KEY
+          value: "test"
+        - name: AWS_DEFAULT_REGION
+          value: "us-east-1"
+        ports:
+        - containerPort: 4566
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/localstack
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: localstack-pvc
+---
+# 3. LocalStack Servisi
+apiVersion: v1
+kind: Service
+metadata:
+  name: localstack-service
+  namespace: bigdata
+spec:
+  type: NodePort
+  ports:
+    - name: api-and-ui
+      port: 4566
+      targetPort: 4566
+      nodePort: 32002
+  selector:
+    app: localstack

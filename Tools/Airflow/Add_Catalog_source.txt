@@ -1,0 +1,83 @@
+TRINO_POD=$(kubectl get pods -n bigdata -l app.kubernetes.io/component=coordinator --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}')
+
+# 1. Principal oluştur
+kubectl exec -it $TRINO_POD -n bigdata -- curl -s -X POST \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/management/v1/principals \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"principal":{"name":"airflow_maintenance_svc"}}'
+
+# 2. Servis hesabına Data Engineer rolünü ata
+kubectl exec -it $TRINO_POD -n bigdata -- curl -s -X PUT \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/management/v1/principals/airflow_maintenance_svc/principal-roles \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"principalRole":{"name":"de_principal_role"}}'
+
+
+# Source Ekleme 
+AIRFLOW_SCHEDULER=$(kubectl get pods -n bigdata -l component=scheduler --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}')
+
+# 1. Eski connection'ı sil
+kubectl exec -it $AIRFLOW_SCHEDULER -n bigdata -c scheduler -- airflow connections delete 'trino_default' 2>/dev/null || true
+
+# 2. Doğru servis adresi (trino:8090) ile yeniden oluştur
+kubectl exec -it $AIRFLOW_SCHEDULER -n bigdata -c scheduler -- airflow connections add 'trino_default' \
+  --conn-type 'trino' \
+  --conn-host 'trino.bigdata.svc.cluster.local' \
+  --conn-port 8090 \
+  --conn-schema 'sts_db' \
+  --conn-login 'airflow_maintenance_svc' \
+  --conn-extra '{"catalog": "iceberg"}'
+
+# Serive Account Olusturma
+
+Aşağıdaki scripti terminalinizde çalıştırarak airflow_maintenance_svc servis hesabını Polaris üzerinde oluşturabilir, Data Engineer yetki rolünü (de_principal_role) atayabilir 
+ve Airflow üzerindeki trino_default connection tanımını bu izole servis hesabıyla güncelleyebilirsiniz:
+  
+# Pod isimlerini belirle
+TRINO_POD=$(kubectl get pods -n bigdata -l app.kubernetes.io/component=coordinator --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}')
+AIRFLOW_SCHEDULER=$(kubectl get pods -n bigdata -l component=scheduler --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}')
+
+echo "=========================================================="
+echo "    1. POLARIS MAINTENANCE SERVICE ACCOUNT OLUŞTURULUYOR   "
+echo "=========================================================="
+
+# 1. Principal oluştur
+RESP=$(kubectl exec -it $TRINO_POD -n bigdata -- curl -s -X POST \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/management/v1/principals \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"principal":{"name":"airflow_maintenance_svc"}}')
+
+echo "Servis Hesabı Yanıtı:"
+echo "$RESP"
+
+# 2. de_principal_role (Full DDL/DML & Storage yetkisi) ata
+kubectl exec -it $TRINO_POD -n bigdata -- curl -s -X PUT \
+  http://polaris-catalog-service.bigdata.svc.cluster.local:8181/api/management/v1/principals/airflow_maintenance_svc/principal-roles \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"principalRole":{"name":"de_principal_role"}}' > /dev/null
+
+echo "--> de_principal_role başarıyla atandı."
+echo "----------------------------------------------------------"
+
+echo "=========================================================="
+echo "    2. AIRFLOW TRINO CONNECTION GÜNCELLENİYOR             "
+echo "=========================================================="
+
+# Varsa eski connection'ı sil
+kubectl exec -it $AIRFLOW_SCHEDULER -n bigdata -c scheduler -- airflow connections delete 'trino_default' 2>/dev/null || true
+
+# Servis hesabı ile yeni connection'ı ekle
+kubectl exec -it $AIRFLOW_SCHEDULER -n bigdata -c scheduler -- airflow connections add 'trino_default' \
+  --conn-type 'trino' \
+  --conn-host 'trino-coordinator-service.bigdata.svc.cluster.local' \
+  --conn-port 8090 \
+  --conn-schema 'sts_db' \
+  --conn-login 'airflow_maintenance_svc' \
+  --conn-extra '{"catalog": "iceberg"}'
+
+echo "----------------------------------------------------------"
+echo "Tamamlandı! Airflow artık izole 'airflow_maintenance_svc' kimliğiyle Trino'ya bağlanacak."

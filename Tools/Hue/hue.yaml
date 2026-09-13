@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hue
+  namespace: bigdata
+  labels:
+    app: hue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hue
+  template:
+    metadata:
+      labels:
+        app: hue
+    spec:
+      containers:
+      - name: hue
+        image: gethue/hue:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8888
+          name: http
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1536Mi"
+        volumeMounts:
+        - name: hue-config-volume
+          mountPath: /usr/share/hue/desktop/conf/z-hue.ini
+          subPath: z-hue.ini
+      volumes:
+      - name: hue-config-volume
+        configMap:
+          name: hue-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hue-service
+  namespace: bigdata
+spec:
+  type: ClusterIP
+  selector:
+    app: hue
+  ports:
+    - name: http
+      port: 8888
+      targetPort: 8888
