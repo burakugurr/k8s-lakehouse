@@ -28,7 +28,7 @@ spec:
             memory: "512Mi"
           limits:
             cpu: "1000m"
-            memory: "1536Mi"
+            memory: "2048Mi"
         volumeMounts:
         - name: hue-config-volume
           mountPath: /usr/share/hue/desktop/conf/z-hue.ini

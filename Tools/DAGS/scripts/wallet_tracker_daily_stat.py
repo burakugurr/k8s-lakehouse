@@ -374,7 +374,7 @@ def run_etl_pipeline(target_date_str: str = None):
     )
     df_user_asset_holdings.writeTo(
         "polaris.wallettracker.daily_user_asset_holdings"
-    ).overwritePartitions()
+    ).append()
 
     # 2. daily_user_portfolio_stats
     summary_filtered = df_summary.filter(
@@ -412,7 +412,7 @@ def run_etl_pipeline(target_date_str: str = None):
     )
     df_user_portfolio_stats.writeTo(
         "polaris.wallettracker.daily_user_portfolio_stats"
-    ).overwritePartitions()
+    ).append()
 
     # 3. daily_user_cashflow
     daily_inc = (
@@ -489,7 +489,7 @@ def run_etl_pipeline(target_date_str: str = None):
     )
     df_daily_cashflow.writeTo(
         "polaris.wallettracker.daily_user_cashflow"
-    ).overwritePartitions()
+    ).append()
 
     # 4. monthly_budget_performance
     monthly_spent = (
@@ -550,12 +550,18 @@ def run_etl_pipeline(target_date_str: str = None):
     )
     df_budget_perf.writeTo(
         "polaris.wallettracker.monthly_budget_performance"
-    ).overwritePartitions()
+    ).append()
 
     # 5. daily_asset_price_summary
+    from pyspark.sql import Window
+    from pyspark.sql import functions as F
+
+    ## 1. İlgili güne (target_date) göre veriyi filtreleme
     df_price_filtered = df_price_hist.filter(
         F.to_date(F.col("timestamp")) == F.lit(target_date)
     )
+
+    ## 2. Window tanımları
     window_asc = Window.partitionBy("asset_id").orderBy(
         F.col("timestamp").asc()
     )
@@ -563,6 +569,7 @@ def run_etl_pipeline(target_date_str: str = None):
         F.col("timestamp").desc()
     )
 
+    ## 3. İlk/Son fiyat belirleme ve metrikleri hesaplama
     price_agg = (
         df_price_filtered.withColumn(
             "open_buy", F.first("alis_price").over(window_asc)
@@ -571,20 +578,20 @@ def run_etl_pipeline(target_date_str: str = None):
         .groupBy("asset_id")
         .agg(
             F.first("open_buy").cast("decimal(18, 4)").alias("open_buy_price"),
-            F.first("close_buy")
-            .cast("decimal(18, 4)")
-            .alias("close_buy_price"),
+            F.first("close_buy").cast("decimal(18, 4)").alias("close_buy_price"),
             F.min("alis_price").cast("decimal(18, 4)").alias("min_buy_price"),
             F.max("alis_price").cast("decimal(18, 4)").alias("max_buy_price"),
-            F.avg(F.col("satis_price") - F.col("alis_price"))
-            .cast("decimal(18, 4)")
-            .alias("avg_spread"),
+            F.avg(F.col("satis_price") - F.col("alis_price")).cast("decimal(18, 4)").alias("avg_spread"),
             F.count("timestamp").alias("sample_points"),
         )
     )
+
+    ## 4. Asset bilgileri ile joinleme
     assets_clean = df_assets.select(
         F.col("asset_id"), F.col("asset_symbol"), F.col("asset_type")
     )
+
+    ## 5. Summary DataFrame oluşturma (price_date burada güvenle eklenebilir)
     df_price_summary = (
         price_agg.join(assets_clean, "asset_id", "inner")
         .withColumn("price_date", F.lit(target_date).cast("date"))
@@ -603,9 +610,11 @@ def run_etl_pipeline(target_date_str: str = None):
             "created_at",
         )
     )
-    df_price_summary.writeTo(
-        "polaris.wallettracker.daily_asset_price_summary"
-    ).overwritePartitions()
+
+    ## 6. Polaris Iceberg Tablosuna Yazdırma (Idempotent - Tekrarlanabilir)
+    df_price_summary.writeTo("polaris.wallettracker.daily_asset_price_summary") \
+        .overwritePartitions()
+
 
     # 6. daily_goal_progress_stats
     goals_clean = df_goals.select(
@@ -671,7 +680,7 @@ def run_etl_pipeline(target_date_str: str = None):
     )
     df_goal_stats.writeTo(
         "polaris.wallettracker.daily_goal_progress_stats"
-    ).overwritePartitions()
+    ).append()
 
     spark.stop()
 

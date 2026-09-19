@@ -10,17 +10,30 @@ data:
     http_host=0.0.0.0
     http_port=8888
     time_zone=Europe/Istanbul
-    app_blacklist=impala,hive,pig,hbase,sqoop,zookeeper,spark
+    allowed_hosts=*
+    django_debug_mode=false
+    csrf_trusted_origins=http://192.168.89.29:8889,http://localhost:8889,http://127.0.0.1:8889
 
     [[database]]
     engine=sqlite3
     name=/usr/share/hue/desktop/desktop.db
 
+    # HDFS ev dizini oluşturma girişimini kapatıyoruz
+    [[auth]]
+    create_home_dir=false
+
+    # Hadoop / HDFS tanımlarını devre dışı bırakıyoruz
+    [hadoop]
+    [[hdfs_clusters]]
+    [[[default]]]
+    # Boş bırakılarak WebHDFS (50070) sorgusu engellenir
+
     [notebook]
     show_notebooks=true
+    enable_batch_executing=false
 
     [[interpreters]]
     [[[trino]]]
     name=Trino
     interface=sqlalchemy
-    options='{"url": "trino://trino.bigdata.svc.cluster.local:8090/iceberg/wallettracker"}'
+    options='{"url": "trino://trino@trino.bigdata.svc.cluster.local:8090/iceberg/wallettracker"}'

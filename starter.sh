@@ -144,7 +144,7 @@ if [ -n "$LOCALSTACK_SELECTOR" ]; then
     LOCALSTACK_POD=$(
         kubectl get pod \
             -n "$NAMESPACE" \
-            ---selector="$LOCALSTACK_SELECTOR" \
+            --selector="$LOCALSTACK_SELECTOR" \
             -o jsonpath='{.items[0].metadata.name}' 2>/dev/null
     ) || LOCALSTACK_POD=""
 
@@ -289,40 +289,54 @@ POLARIS_TOKEN=$(
         -X POST \
         http://localhost:8181/api/catalog/v1/oauth/tokens \
         -H "Content-Type: application/x-www-form-urlencoded" \
-        -d "grant_type=client_credentials" \
-        -d "client_id=polaris_root" \
-        -d "client_secret=polaris_secret123" \
-        -d "scope=PRINCIPAL_ROLE:ALL" |
-    grep -o '"access_token":"[^"]*' |
-    grep -o '[^"]*$' || true
+        -d "grant_type=client_credentials&client_id=polaris_root&client_secret=polaris_secret123&scope=PRINCIPAL_ROLE:ALL" |
+    grep -o '"access_token":"[^"]*' | cut -d'"' -f4 || true
 )
 
 if [ -n "$POLARIS_TOKEN" ]; then
 
     echo "  ✔ Polaris token başarıyla alındı."
 
-    CURRENT_VERSION=$(
-        curl -s \
-            -X GET \
-            http://localhost:8181/api/management/v1/catalogs \
-            -H "Authorization: Bearer $POLARIS_TOKEN" |
-        grep -o '"entityVersion":[0-9]*' |
-        head -1 |
-        cut -d':' -f2 || true
-    )
+    # Katalog mevcut mu kontrol et
+    CATALOG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" -X GET http://localhost:8181/api/management/v1/catalogs/polaris -H "Authorization: Bearer $POLARIS_TOKEN")
 
-    if [ -z "$CURRENT_VERSION" ]; then
-        CURRENT_VERSION=1
-    fi
+    if [ "$CATALOG_EXISTS" -eq 404 ]; then
+        echo "  ➜ 'polaris' kataloğu bulunamadı, sıfırdan oluşturuluyor..."
+        CREATE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8181/api/management/v1/catalogs \
+            -H "Authorization: Bearer $POLARIS_TOKEN" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            -d '{
+                "catalog": {
+                    "name": "polaris",
+                    "type": "INTERNAL",
+                    "readOnly": false,
+                    "properties": {
+                        "default-base-location": "s3://warehouse/",
+                        "file-io.impl": "org.apache.iceberg.aws.s3.S3FileIO",
+                        "s3.endpoint": "http://localstack-service.bigdata.svc.cluster.local:4566",
+                        "s3.path-style-access": "true",
+                        "s3.access-key-id": "test",
+                        "s3.secret-access-key": "test",
+                        "client.region": "us-east-1"
+                    },
+                    "storageConfigInfo": {
+                        "storageType": "S3",
+                        "allowedLocations": ["s3://warehouse/", "s3://warehouse/*"]
+                    }
+                }
+            }')
 
-    echo "  ➜ Mevcut catalog entity version: $CURRENT_VERSION"
+        if [ "$CREATE_STATUS" -eq 200 ] || [ "$CREATE_STATUS" -eq 201 ]; then
+            echo "  ✔ 'polaris' kataloğu başarıyla oluşturuldu."
+        else
+            echo "  ⚠️ Katalog oluşturulurken hata (HTTP $CREATE_STATUS)."
+        fi
+    else
+        echo "  ➜ 'polaris' kataloğu mevcut, ayarları güncelleniyor..."
+        CURRENT_VERSION=$(curl -s -X GET http://localhost:8181/api/management/v1/catalogs/polaris -H "Authorization: Bearer $POLARIS_TOKEN" | grep -o '"entityVersion":[0-9]*' | head -1 | cut -d':' -f2 || echo "1")
 
-    HTTP_STATUS=$(
-        curl -s \
-            -o /dev/null \
-            -w "%{http_code}" \
-            -X PUT \
-            http://localhost:8181/api/management/v1/catalogs/polaris \
+        UPDATE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT http://localhost:8181/api/management/v1/catalogs/polaris \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $POLARIS_TOKEN" \
             -d '{
@@ -341,28 +355,20 @@ if [ -n "$POLARIS_TOKEN" ]; then
                     },
                     "storageConfigInfo": {
                         "storageType": "S3",
-                        "roleArn": "arn:aws:iam::000000000000:role/polaris-s3-role",
-                        "region": "us-east-1",
-                        "endpoint": "http://localstack-service.bigdata.svc.cluster.local:4566",
-                        "pathStyleAccess": true,
-                        "allowedLocations": [
-                            "s3://warehouse/*",
-                            "s3://warehouse/"
-                        ]
+                        "allowedLocations": ["s3://warehouse/", "s3://warehouse/*"]
                     }
                 }
-            }'
-    )
+            }')
 
-    if [ "$HTTP_STATUS" -eq 200 ] ||
-       [ "$HTTP_STATUS" -eq 204 ]
-    then
-        echo "  ✔ 'polaris' kataloğu LocalStack S3 ayarlarıyla güncellendi."
-    else
-        echo "  ⚠️ Katalog güncellenirken bir sorun oluştu."
-        echo "     HTTP Status: $HTTP_STATUS"
+        if [ "$UPDATE_STATUS" -eq 200 ] || [ "$UPDATE_STATUS" -eq 204 ]; then
+            echo "  ✔ 'polaris' kataloğu başarıyla güncellendi."
+        else
+            echo "  ⚠️ Katalog güncellenirken bir sorun oluştu (HTTP $UPDATE_STATUS)."
+        fi
     fi
 
+    # Namespace kontrolü/oluşturma
+    echo "  ➜ 'wallettracker' namespace kontrolü yapılıyor..."
     NAMESPACE_STATUS=$(
         curl -s \
             -o /dev/null \
@@ -379,9 +385,9 @@ if [ -n "$POLARIS_TOKEN" ]; then
        [ "$NAMESPACE_STATUS" -eq 204 ] ||
        [ "$NAMESPACE_STATUS" -eq 409 ]
     then
-        echo "  ✔ 'wallettracker' namespace kontrolü tamamlandı."
+        echo "  ✔ 'wallettracker' namespace hazır."
     else
-        echo "  ⚠️ 'wallettracker' namespace kontrolünde HTTP $NAMESPACE_STATUS döndü."
+        echo "  ⚠️ 'wallettracker' namespace kontrolünde hata (HTTP $NAMESPACE_STATUS)."
     fi
 
 else

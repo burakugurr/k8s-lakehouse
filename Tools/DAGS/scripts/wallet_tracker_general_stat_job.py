@@ -5,9 +5,6 @@ from pyspark.sql import functions as F
 
 import urllib.request
 import json
-
-import urllib.request
-import json
 from pyspark.errors.exceptions.captured import AnalysisException
 
 def get_or_create_table(spark: SparkSession, table_name: str, create_sql: str, base_url: str, client_id: str, client_secret: str):
@@ -142,7 +139,7 @@ def main(target_date_str: str = None):
     # -------------------------------------------------------------
     # 1. POLARIS NAMESPACE & TABLO HAZIRLIKLARI (FAIL-SAFE)
     # -------------------------------------------------------------
-    spark.sql("CREATE NAMESPACE IF NOT EXISTS polaris.wallettracker")
+    #spark.sql("CREATE NAMESPACE IF NOT EXISTS polaris.wallettracker")
     
     create_holdings_sql = """
     CREATE TABLE IF NOT EXISTS polaris.wallettracker.daily_user_asset_holdings (
@@ -213,10 +210,11 @@ def main(target_date_str: str = None):
             "created_at"
         )
 
+    # DÜZELTME: overwritePartitions() yerine append() kullanıldı.
     df_user_asset_holdings.writeTo("polaris.wallettracker.daily_user_asset_holdings") \
-        .overwritePartitions()
+        .append()
 
-    print("Tablo 1 (daily_user_asset_holdings) başarıyla yazıldı.")
+    print("Tablo 1 (daily_user_asset_holdings) başarıyla log olarak eklendi.")
 
     # -------------------------------------------------------------
     # 2. TABLO: Kullanıcı Bazlı Günlük Ortalama Portföy Değeri
@@ -250,10 +248,11 @@ def main(target_date_str: str = None):
             "created_at"
         )
 
+    # DÜZELTME: overwritePartitions() yerine append() kullanıldı.
     df_user_portfolio_stats.writeTo("polaris.wallettracker.daily_user_portfolio_stats") \
-        .overwritePartitions()
+        .append()
 
-    print("Tablo 2 (daily_user_portfolio_stats) başarıyla yazıldı.")
+    print("Tablo 2 (daily_user_portfolio_stats) başarıyla log olarak eklendi.")
     print(f"GÜN:{target_date} İşlem başarıyla tamamlandı.")
 
 if __name__ == "__main__":
